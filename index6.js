@@ -190,10 +190,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // upload document api
-    // URL - https://racsharikidev.appiancloud.com/suite/webapi/uploadDocument
-
     // Handle file upload
+    let fileUploadResult;
     const evidenceInput = document.getElementById('evidence');
     evidenceInput.addEventListener('change', async (event) => {
         const file = event.target.files[0];
@@ -203,8 +201,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Send file as Blob to the API
                 const response = await uploadFileAsBlob(file);
                 if (response.ok) {
-                    const result = await response.json();
-                    console.log('File uploaded successfully:', result);
+                    fileUploadResult = await response.json();
+                    console.log('File uploaded successfully:', fileUploadResult);
                     alert('File uploaded successfully!');
                 } else {
                     throw new Error('Failed to upload the file');
@@ -221,7 +219,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Upload document API function
     async function uploadFileAsBlob(file) {
         const buf = await fileToBlob(file);
-        console.log('buf: ', buf);
 
         const response = await fetch('https://racsharikidev.appiancloud.com/suite/webapi/uploadDocument', {
             method: 'POST',
@@ -241,8 +238,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-
-
     // Get current route path and query params
     const getCurrentRouteInfo = () => {
         const params = new URLSearchParams(window.location.search);
@@ -253,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     const routeInfo = getCurrentRouteInfo();
-    console.log('routeInfo: ', routeInfo);
+    // console.log('routeInfo: ', routeInfo);
 
     // Handle form submission
     document?.getElementById('contactForm')?.addEventListener('submit', async (event) => {
@@ -262,6 +257,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const messageElement = document.getElementById('message');
         messageElement.className = 'message';
         messageElement.textContent = '';
+
+        const payload = {
+            moduleId: 694,
+            isSecurity: routeInfo?.params?.type?.toLowerCase()=="security",
+            params: getModPayload(Object.fromEntries(new FormData(event.target)), fileUploadResult),
+        }
 
         try {
             messageElement.textContent = translations[currentLang].submitting;
@@ -273,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     'Appian-API-Key': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYjgwMjdlMi0wMmQ3LTZhMjItMzA4Zi1lMjI0N2ViZGI0NTkifQ.vtwQw8tQH06ftW-C3guvW9oPn15SHjDPNLydTLZpAf4',
                 },
                 method: 'POST',
-                body: JSON.stringify(getModPayload(Object.fromEntries(new FormData(event.target)))),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {
@@ -292,203 +293,199 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 })
 
-function getModPayload(data) {
-    console.log('data: ', data);
+function getModPayload(data, fileUploadResult) {
+    // console.log('data: ', data);
     // return data;
-    return {
-        "moduleId": 694,
-        "isSecurity": false,
-        "params": [
-            {
-                "fieldId": 1,
-                "label": "Subject of Incident",
-                "value": data?.subject,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "b97732a0-c898-4ed1-a039-55ee85583b92",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 2,
-                "label": "Date and time for reporting",
-                "value": data?.reportingDateTime,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "b671dfd3-44e1-4e56-8e8a-a611719b4bbb",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 4,
-                "label": "Location",
-                "value": data?.locationDesc,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "ab7f39bb-09de-48f5-aa61-240692968739",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 5,
-                "label": "Location Description",
-                "value": data?.locationDesc,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "447c2b5b-40d3-45fa-884d-27158abf87ab",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 6,
-                "label": "Description of Incident",
-                "value": data?.description,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "2f4bed99-6658-43e2-ad14-0b7979d707af",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 7,
-                "label": "Contact number",
-                "value": data?.contact,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "2931036c-2f31-4cf0-918a-e77a6435c7a6",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 8,
-                "label": "Evidence attachment",
-                "value": data?.evidence,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "25516306-5ee4-4a85-a655-d0447f29754a",
-                "fieldTypeId": 10
-            },
-            {
-                "fieldId": 9,
-                "label": "Lat",
-                "value": data?.latitude,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "f59c80d6-1ff5-410a-9376-70f15711831b",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 10,
-                "label": "Lng",
-                "value": data?.longitude,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "baadc873-3805-4cf1-85a6-9b45a114e367",
-                "fieldTypeId": 1
-            },
-            {
-                "fieldId": 11,
-                "label": "Date and time of the incident",
-                "value": data?.incidentDateTime,
-                "gridResponse": [
-                    {}
-                ],
-                "slctdLabels": [
-                    ""
-                ],
-                "slctdValues": [
-                    null
-                ],
-                "documentIds": [
-                    null
-                ],
-                "fieldIdentifier": "9fb2422e-e559-4151-bd3b-36994de07753",
-                "fieldTypeId": 1
-            }
-        ]
-    };
+    return [
+        {
+            "fieldId": 1,
+            "label": "Subject of Incident",
+            "value": data?.subject,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "b97732a0-c898-4ed1-a039-55ee85583b92",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 2,
+            "label": "Date and time for reporting",
+            "value": data?.reportingDateTime,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "b671dfd3-44e1-4e56-8e8a-a611719b4bbb",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 4,
+            "label": "Location",
+            "value": data?.locationDesc,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "ab7f39bb-09de-48f5-aa61-240692968739",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 5,
+            "label": "Location Description",
+            "value": data?.locationDesc,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "447c2b5b-40d3-45fa-884d-27158abf87ab",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 6,
+            "label": "Description of Incident",
+            "value": data?.description,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "2f4bed99-6658-43e2-ad14-0b7979d707af",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 7,
+            "label": "Contact number",
+            "value": data?.contact,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "2931036c-2f31-4cf0-918a-e77a6435c7a6",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 8,
+            "label": "Evidence attachment",
+            "value": fileUploadResult?.result?.docId,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "25516306-5ee4-4a85-a655-d0447f29754a",
+            "fieldTypeId": 10
+        },
+        {
+            "fieldId": 9,
+            "label": "Lat",
+            "value": data?.latitude,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "f59c80d6-1ff5-410a-9376-70f15711831b",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 10,
+            "label": "Lng",
+            "value": data?.longitude,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "baadc873-3805-4cf1-85a6-9b45a114e367",
+            "fieldTypeId": 1
+        },
+        {
+            "fieldId": 11,
+            "label": "Date and time of the incident",
+            "value": data?.incidentDateTime,
+            "gridResponse": [
+                {}
+            ],
+            "slctdLabels": [
+                ""
+            ],
+            "slctdValues": [
+                null
+            ],
+            "documentIds": [
+                null
+            ],
+            "fieldIdentifier": "9fb2422e-e559-4151-bd3b-36994de07753",
+            "fieldTypeId": 1
+        }
+    ];
 }
