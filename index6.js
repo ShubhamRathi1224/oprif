@@ -113,7 +113,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         switchLangBtn.textContent = translation.switchLang;
 
-        // Adjust text direction
         document.body.style.direction = currentLang === 'en' ? 'ltr' : 'rtl';
     });
 
@@ -145,14 +144,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const validateCaptchaButton = document.getElementById('validateCaptchaButton');
     const contactForm = document.getElementById('contactForm');
     const captchaValidationSection = document.getElementById('captchaValidationSection');
-    // CAPTCHA Validation
+    
     validateCaptchaButton.addEventListener('click', () => {
-        captchaMessage.textContent = ''; // Clear message
+        captchaMessage.textContent = ''; 
         if (captchaInput.value === currentCaptcha) {
             captchaMessage.textContent = translations[currentLang].validCaptcha;
             captchaMessage.className = 'message success';
 
-            // Hide CAPTCHA section and show the form
             captchaValidationSection.style.display = 'none';
             contactForm.style.display = 'block';
 
@@ -164,13 +162,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function fetchAndAutofillDetails() {
-        // Autofill date and time
         const dateField = document.getElementById('reportingDateTime');
 
         const now = new Date();
         dateField.value = now;
 
-        // Fetch and autofill location
         const latitudeField = document.getElementById('latitude');
         const longitudeField = document.getElementById('longitude');
         if (navigator.geolocation) {
@@ -198,7 +194,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (file) {
             try {
-                // Send file as Blob to the API
                 const response = await uploadFileAsBlob(file);
                 if (response.ok) {
                     fileUploadResult = await response.json();
@@ -216,7 +211,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Upload document API function
     async function uploadFileAsBlob(file) {
         const buf = await fileToBlob(file);
 
@@ -224,9 +218,9 @@ document.addEventListener("DOMContentLoaded", function () {
             method: 'POST',
             headers: {
                 'Appian-API-Key': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYjgwMjdlMi0wMmQ3LTZhMjItMzA4Zi1lMjI0N2ViZGI0NTkifQ.vtwQw8tQH06ftW-C3guvW9oPn15SHjDPNLydTLZpAf4',
-                'Content-Type': file?.type,  //  'application/octet-stream',
+                'Content-Type': file?.type, 
             },
-            body: buf, // Send the formData containing the file
+            body: buf,
         });
 
         return response;
@@ -250,9 +244,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const routeInfo = getCurrentRouteInfo();
     // console.log('routeInfo: ', routeInfo);
 
-    // Handle form submission
     document?.getElementById('contactForm')?.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
 
         const messageElement = document.getElementById('message');
         messageElement.className = 'message';
@@ -266,7 +259,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             messageElement.textContent = translations[currentLang].submitting;
-            // const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
             const response = await fetch('https://racsharikidev.appiancloud.com/suite/webapi/createCase', {
                 headers: {
                     'Accept': 'application/json',
@@ -319,7 +311,7 @@ function getModPayload(data, fileUploadResult) {
         {
             "fieldId": 2,
             "label": "Date and time for reporting",
-            "value": data?.reportingDateTime,
+            "value": formatReportingDate(data?.reportingDateTime),
             "gridResponse": [
                 {}
             ],
@@ -338,7 +330,7 @@ function getModPayload(data, fileUploadResult) {
         {
             "fieldId": 4,
             "label": "Location",
-            "value": data?.locationDesc,
+            "value": createGoogleMapsLink(data?.latitude, data?.longitude),
             "gridResponse": [
                 {}
             ],
@@ -425,7 +417,7 @@ function getModPayload(data, fileUploadResult) {
                 null
             ],
             "documentIds": [
-                null
+                fileUploadResult?.result?.docId
             ],
             "fieldIdentifier": "25516306-5ee4-4a85-a655-d0447f29754a",
             "fieldTypeId": 10
@@ -471,7 +463,7 @@ function getModPayload(data, fileUploadResult) {
         {
             "fieldId": 11,
             "label": "Date and time of the incident",
-            "value": data?.incidentDateTime,
+            "value": formatIncidentDate(data?.incidentDateTime),
             "gridResponse": [
                 {}
             ],
@@ -488,4 +480,42 @@ function getModPayload(data, fileUploadResult) {
             "fieldTypeId": 1
         }
     ];
+}
+
+function createGoogleMapsLink(latitude, longitude) {
+return `https://www.google.com/maps?q=${latitude},${longitude}`;
+}
+
+function formatReportingDate(dateString) {
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; 
+
+    return `${month}/${day}/${year} ${hours}:${minutes} ${ampm}`;
+}
+
+
+
+function formatIncidentDate(dateString) {
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0'); 
+    const ampm = hours >= 12 ? 'pm' : 'am';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    return `${month}/${day}/${year} ${hours}:${minutes} ${ampm}`;
 }
